@@ -15,7 +15,7 @@ const (
 	VBOSE
 	FATAL
 
-	FUNC = uint8(1 << iota)
+	FUNC = lFlag(1 << iota)
 	LINE
 	FILE
 
@@ -33,11 +33,15 @@ func defaultPrefix() func() string {
 	}
 }
 
+// lFlag : to prevent others from accidently messing with it
+type lFlag uint8
+
 // some Log prefixs
 var (
-	LoggerFlags    uint8 = 0
+	LoggerFlags    lFlag = 0
 	DisplayWarning       = true
-	LoggerPrefix         = defaultPrefix()
+	Order                = false
+	LoggerPrefix         = defaultPrefix() // goes after the log type and file|func|line info
 
 	depth   = -1
 	logType = [5]string{
@@ -171,8 +175,46 @@ func Fatal(args ...interface{}) {
 
 // Printer :
 func Printer(prefix uint8, msg string) {
-	fmt.Print(logType[prefix] + whereAmI(LoggerFlags) + ":" + LoggerPrefix() + msg)
+	fmt.Print(logType[prefix] + swap(Order) + msg)
 }
+
+// ###################### Decorator ######################
+
+// lDECOR : just another uint8 type
+type lDECOR uint8
+
+const (
+	betweenPrefix lDECOR = iota
+	afterType
+	afterInfo
+	seperator
+)
+
+var (
+	decor = [4]string{
+		":",
+		" {",
+		"}->",
+		"|",
+	}
+)
+
+// Decorator : $log_type = [info|warn|error] $log_info = [file|func|line] $extra_prefix is developer define prefix
+//	[0] = between prefix i.e. $log_type $log_info ':' $extra_prefix $msg
+//	[1] = after log type i.e. $log_type '{' $log_info $extra_prefix $msg
+//	[2] = after log info i.e. $log_type $log_info '}' $extra_prefix $msg
+//	[3] = seperator in $log_info i.e. file '|' func '|' line
+func Decorator(args ...string) {
+	if len(args) > 5 {
+		Warn("PPrinter -- There are only 4 options\n")
+	}
+
+	for i, a := range args {
+		decor[i] = a
+	}
+}
+
+// ###################### Utils ######################
 
 func checkPointerType(args ...interface{}) []interface{} {
 
@@ -190,8 +232,52 @@ func checkPointerType(args ...interface{}) []interface{} {
 	return args
 }
 
-func getFormatStr(length int) string {
+func swap(order bool) string {
+	if order {
+		return LoggerPrefix() + decor[betweenPrefix] + whereAmI(LoggerFlags)
+	}
 
+	return whereAmI(LoggerFlags) + decor[betweenPrefix] + LoggerPrefix()
+}
+
+func whereAmI(flag lFlag) string {
+	if flag == 0 {
+		return ""
+	}
+
+	if depth == -1 {
+		depth = 3
+	}
+
+	function, file, line, ok := runtime.Caller(depth)
+	if DisplayWarning && !ok {
+		fmt.Print(logType[WARN] + ": PPrinter -- Couldn't recover [function/file/line]\n")
+		return ""
+	}
+
+	format := decor[afterType]
+	if flag&(FILE) != 0 {
+		format += fileOnly(file)
+		if flag&(FUNC|LINE) != 0 {
+			format += decor[seperator]
+		}
+	}
+
+	if flag&(FUNC) != 0 {
+		format += runtime.FuncForPC(function).Name()
+		if flag&(LINE) != 0 {
+			format += decor[seperator]
+		}
+	}
+
+	if flag&(LINE) != 0 {
+		format += fmt.Sprintf("%d", line)
+	}
+
+	return format + decor[afterInfo]
+}
+
+func getFormatStr(length int) string {
 	format := ""
 	for i := 0; i < length; i++ {
 		format += "%+v "
@@ -207,41 +293,4 @@ func fileOnly(str string) string {
 	}
 
 	return str[i+1:]
-}
-
-func whereAmI(flag uint8) string {
-	if flag == 0 {
-		return ""
-	}
-
-	if depth == -1 {
-		depth = 3
-	}
-
-	function, file, line, ok := runtime.Caller(depth)
-	if DisplayWarning && !ok {
-		fmt.Print(logType[WARN] + " PPrinter -- Couldn't recover [function/file/line] \n")
-		return ""
-	}
-
-	format := " {"
-	if flag&(FILE) != 0 {
-		format += fileOnly(file)
-		if flag&(FUNC|LINE) != 0 {
-			format += "|"
-		}
-	}
-
-	if flag&(FUNC) != 0 {
-		format += runtime.FuncForPC(function).Name()
-		if flag&(LINE) != 0 {
-			format += "|"
-		}
-	}
-
-	if flag&(LINE) != 0 {
-		format += fmt.Sprintf("%d", line)
-	}
-
-	return format + "}->"
 }

@@ -1,4 +1,4 @@
-package pprinter
+package ppt
 
 import (
 	"fmt"
@@ -271,7 +271,9 @@ func whereAmI(flag lFlag) string {
 	}
 
 	if flag&(FUNC) != 0 {
-		format += runtime.FuncForPC(function).Name()
+		funcStr := runtime.FuncForPC(function).Name()
+		start := strings.LastIndex(format, "/") // remove folder path
+		format += funcStr[start:]
 		if flag&(LINE) != 0 {
 			format += decor[seperator]
 		}

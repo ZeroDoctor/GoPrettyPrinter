@@ -273,6 +273,9 @@ func whereAmI(flag lFlag) string {
 	if flag&(FUNC) != 0 {
 		funcStr := runtime.FuncForPC(function).Name()
 		start := strings.LastIndex(format, "/") // remove folder path
+		if start == -1 {
+			start = 0
+		}
 		format += funcStr[start:]
 		if flag&(LINE) != 0 {
 			format += decor[seperator]

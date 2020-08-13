@@ -225,7 +225,6 @@ func Decorator(args ...string) {
 // ###################### Utils ######################
 
 func checkPointerType(args ...interface{}) []interface{} {
-
 	if !DisplayWarning {
 		return args
 	}

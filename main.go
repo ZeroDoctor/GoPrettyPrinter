@@ -60,22 +60,22 @@ func SetInfoColor(color string) {
 
 // SetWarnColor :
 func SetWarnColor(color string) {
-	logType[pINFO] = color + "INFO" + cRST
+	logType[pWARN] = color + "INFO" + cRST
 }
 
 // SetErrorColor :
 func SetErrorColor(color string) {
-	logType[pINFO] = color + "INFO" + cRST
+	logType[pERROR] = color + "INFO" + cRST
 }
 
 // SetVerboseColor :
 func SetVerboseColor(color string) {
-	logType[pINFO] = color + "INFO" + cRST
+	logType[pVBOSE] = color + "INFO" + cRST
 }
 
 // SetFatalColor :
 func SetFatalColor(color string) {
-	logType[pINFO] = color + "INFO" + cRST
+	logType[pFATAL] = color + "INFO" + cRST
 }
 
 // ###################### Format Log ######################

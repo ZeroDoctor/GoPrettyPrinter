@@ -9,22 +9,22 @@ import (
 
 // Flags and Colors
 const (
-	INFO = iota
-	WARN
-	ERROR
-	VBOSE
-	FATAL
+	pINFO = iota
+	pWARN
+	pERROR
+	pVBOSE
+	pFATAL
 
 	FUNC = lFlag(1 << iota)
 	LINE
 	FILE
 
-	BLU = "\033[1;34m"
-	YEL = "\033[1;33m"
-	RED = "\033[1;31m"
-	GRE = "\033[1;32m"
-	FAT = "\033[1;31;103m"
-	RST = "\033[0m"
+	BLU  = "\033[1;34m"
+	YEL  = "\033[1;33m"
+	RED  = "\033[1;31m"
+	GRE  = "\033[1;32m"
+	FAT  = "\033[1;31;103m"
+	cRST = "\033[0m"
 )
 
 func defaultPrefix() func() string {
@@ -45,11 +45,11 @@ var (
 
 	depth   = -1
 	logType = [5]string{
-		BLU + "INFO" + RST,
-		YEL + "WARN" + RST,
-		RED + "ERROR" + RST,
-		GRE + "VBOSE" + RST,
-		FAT + "FATAL" + RST,
+		BLU + "INFO" + cRST,
+		YEL + "WARN" + cRST,
+		RED + "ERROR" + cRST,
+		GRE + "VBOSE" + cRST,
+		FAT + "FATAL" + cRST,
 	}
 )
 
@@ -102,7 +102,7 @@ func Infoln(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(INFO, msg)
+	Printer(pINFO, msg)
 }
 
 // Warnln :
@@ -110,7 +110,7 @@ func Warnln(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(WARN, msg)
+	Printer(pWARN, msg)
 }
 
 // Errorln :
@@ -118,7 +118,7 @@ func Errorln(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(ERROR, msg)
+	Printer(pERROR, msg)
 }
 
 // Verboseln :
@@ -126,7 +126,7 @@ func Verboseln(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(VBOSE, msg)
+	Printer(pVBOSE, msg)
 }
 
 // Fatalln :
@@ -134,7 +134,7 @@ func Fatalln(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(FATAL, msg)
+	Printer(pFATAL, msg)
 }
 
 // ###################### Non-Format Log ######################
@@ -144,7 +144,7 @@ func Info(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(INFO, msg)
+	Printer(pINFO, msg)
 }
 
 // Warn :
@@ -152,7 +152,7 @@ func Warn(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(WARN, msg)
+	Printer(pWARN, msg)
 }
 
 // Error :
@@ -160,7 +160,7 @@ func Error(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(ERROR, msg)
+	Printer(pERROR, msg)
 }
 
 // Verbose :
@@ -168,7 +168,7 @@ func Verbose(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(VBOSE, msg)
+	Printer(pVBOSE, msg)
 }
 
 // Fatal :
@@ -176,7 +176,7 @@ func Fatal(args ...interface{}) {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(FATAL, msg)
+	Printer(pFATAL, msg)
 }
 
 // ###################### The Big Boy on the Block ######################
@@ -258,7 +258,7 @@ func whereAmI(flag lFlag) string {
 
 	function, file, line, ok := runtime.Caller(depth)
 	if DisplayWarning && !ok {
-		fmt.Print(logType[WARN] + ": PPrinter -- Couldn't recover [function/file/line]\n")
+		fmt.Print(logType[pWARN] + ": PPrinter -- Couldn't recover [function/file/line]\n")
 		return ""
 	}
 

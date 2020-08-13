@@ -53,6 +53,31 @@ var (
 	}
 )
 
+// SetInfoColor :
+func SetInfoColor(color string) {
+	logType[pINFO] = color + "INFO" + cRST
+}
+
+// SetWarnColor :
+func SetWarnColor(color string) {
+	logType[pINFO] = color + "INFO" + cRST
+}
+
+// SetErrorColor :
+func SetErrorColor(color string) {
+	logType[pINFO] = color + "INFO" + cRST
+}
+
+// SetVerboseColor :
+func SetVerboseColor(color string) {
+	logType[pINFO] = color + "INFO" + cRST
+}
+
+// SetFatalColor :
+func SetFatalColor(color string) {
+	logType[pINFO] = color + "INFO" + cRST
+}
+
 // ###################### Format Log ######################
 
 // Infof : logs info

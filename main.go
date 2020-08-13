@@ -18,13 +18,6 @@ const (
 	FUNC = lFlag(1 << iota)
 	LINE
 	FILE
-
-	BLU  = "\033[1;34m"
-	YEL  = "\033[1;33m"
-	RED  = "\033[1;31m"
-	GRE  = "\033[1;32m"
-	FAT  = "\033[1;31;103m"
-	cRST = "\033[0m"
 )
 
 func defaultPrefix() func() string {
@@ -38,6 +31,13 @@ type lFlag uint8
 
 // some Log prefixs
 var (
+	BLU  = "\033[1;34m"
+	YEL  = "\033[1;33m"
+	RED  = "\033[1;31m"
+	GRE  = "\033[1;32m"
+	FAT  = "\033[1;31;103m"
+	cRST = "\033[0m"
+
 	LoggerFlags    lFlag = 0
 	DisplayWarning       = true
 	Order                = false

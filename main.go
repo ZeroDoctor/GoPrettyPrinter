@@ -273,6 +273,7 @@ func whereAmI(flag lFlag) string {
 	if flag&(FUNC) != 0 {
 		funcStr := runtime.FuncForPC(function).Name()
 		start := strings.LastIndex(format, "/") // remove folder path
+		fmt.Println(start)
 		if start == -1 {
 			start = 0
 		}

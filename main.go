@@ -224,7 +224,7 @@ func whereAmI(flag uint8) string {
 		return ""
 	}
 
-	format := ">{"
+	format := " {"
 	if flag&(FILE) != 0 {
 		format += fileOnly(file)
 		if flag&(FUNC|LINE) != 0 {
@@ -243,5 +243,5 @@ func whereAmI(flag uint8) string {
 		format += fmt.Sprintf("%d", line)
 	}
 
-	return format + "}<"
+	return format + "}->"
 }

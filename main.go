@@ -57,7 +57,7 @@ var (
 
 // Infof : logs info
 func Infof(msg string, args ...interface{}) {
-	depth = 4
+	depth = 5
 	str := fmt.Sprintf(msg, args...)
 	Info(str)
 	depth = -1
@@ -65,7 +65,7 @@ func Infof(msg string, args ...interface{}) {
 
 // Warnf :
 func Warnf(msg string, args ...interface{}) {
-	depth = 4
+	depth = 5
 	str := fmt.Sprintf(msg, args...)
 	Warn(str)
 	depth = -1
@@ -73,7 +73,7 @@ func Warnf(msg string, args ...interface{}) {
 
 // Errorf :
 func Errorf(msg string, args ...interface{}) {
-	depth = 4
+	depth = 5
 	str := fmt.Sprintf(msg, args...)
 	Error(str)
 	depth = -1
@@ -81,9 +81,17 @@ func Errorf(msg string, args ...interface{}) {
 
 // Verbosef :
 func Verbosef(msg string, args ...interface{}) {
-	depth = 4
+	depth = 5
 	str := fmt.Sprintf(msg, args...)
 	Verbose(str)
+	depth = -1
+}
+
+// Fatalf :
+func Fatalf(msg string, args ...interface{}) {
+	depth = 5
+	str := fmt.Sprintf(msg, args...)
+	Fatal(str)
 	depth = -1
 }
 
@@ -246,7 +254,7 @@ func whereAmI(flag lFlag) string {
 	}
 
 	if depth == -1 {
-		depth = 3
+		depth = 4
 	}
 
 	function, file, line, ok := runtime.Caller(depth)

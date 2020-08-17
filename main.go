@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"syscall"
 )
 
 // Flags and Colors
@@ -53,11 +54,42 @@ var (
 	}
 )
 
+func setupWindows(stream syscall.Handle, enable bool) error {
+
+	var (
+		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")
+		setConsoleMode *syscall.LazyProc = kernel32Dll.NewProc("SetConsoleMode")
+	)
+
+	const ENABLE_VIRTUAL_TERMINAL_PROCESSING uint32 = 0x4
+
+	var mode uint32
+	err := syscall.GetConsoleMode(syscall.Stdout, &mode)
+	if err != nil {
+		return err
+	}
+
+	if enable {
+		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	} else {
+		mode &^= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	}
+
+	ret, _, err := setConsoleMode.Call(uintptr(stream), uintptr(mode))
+	if ret == 0 {
+		return err
+	}
+
+	return nil
+}
+
 // SetOS :
 func SetOS(os string) {
 	if os != "windows" {
 		return
 	}
+
+	setupWindows(syscall.Stdout, true)
 
 	BLU = "\x1b[1;34m"
 	YEL = "\x1b[1;33m"
@@ -82,22 +114,22 @@ func SetInfoColor(color string) {
 
 // SetWarnColor :
 func SetWarnColor(color string) {
-	logType[pWARN] = color + "INFO" + cRST
+	logType[pWARN] = color + "WARN" + cRST
 }
 
 // SetErrorColor :
 func SetErrorColor(color string) {
-	logType[pERROR] = color + "INFO" + cRST
+	logType[pERROR] = color + "ERROR" + cRST
 }
 
 // SetVerboseColor :
 func SetVerboseColor(color string) {
-	logType[pVBOSE] = color + "INFO" + cRST
+	logType[pVBOSE] = color + "VBOSE" + cRST
 }
 
 // SetFatalColor :
 func SetFatalColor(color string) {
-	logType[pFATAL] = color + "INFO" + cRST
+	logType[pFATAL] = color + "FATAL" + cRST
 }
 
 // ###################### Format Log ######################

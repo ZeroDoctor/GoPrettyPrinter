@@ -4,7 +4,16 @@ package ppt
 
 import "syscall"
 
-func setupWindows(stream syscall.Handle, enable bool) error {
+// Windows :
+type Windows struct {
+	name string
+}
+
+func (w *Windows) getName() string {
+	return w.name
+}
+
+func (w *Windows) setup(stream syscall.Handle, enable bool) error {
 
 	var (
 		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")

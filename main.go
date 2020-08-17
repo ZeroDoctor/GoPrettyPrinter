@@ -54,13 +54,19 @@ var (
 	}
 )
 
+// OSI : need to find a better way to do this
+type OSI interface {
+	getName() string
+	setup(syscall.Handle, bool) error
+}
+
 // SetOS :
-func SetOS(os string) {
-	if os != "windows" {
+func SetOS(os OSI) {
+	if os.getName() != "windows" {
 		return
 	}
 
-	setupWindows(syscall.Stdout, true)
+	os.setup(syscall.Stdout, true)
 
 	BLU = "\x1b[1;34m"
 	YEL = "\x1b[1;33m"

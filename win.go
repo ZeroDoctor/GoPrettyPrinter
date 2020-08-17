@@ -2,9 +2,13 @@
 
 package ppt
 
-import "syscall"
+import (
+	"fmt"
+	"syscall"
+)
 
 func (w *platform) setup(enable bool) error {
+	fmt.Println("Setting up for windows...")
 	var (
 		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")
 		setConsoleMode *syscall.LazyProc = kernel32Dll.NewProc("SetConsoleMode")

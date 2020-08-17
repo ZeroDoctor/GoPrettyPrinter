@@ -13,7 +13,7 @@ func (w *Windows) getName() string {
 	return w.name
 }
 
-func (w *Windows) setup(stream syscall.Handle, enable bool) error {
+func (w *Windows) setup(enable bool) error {
 
 	var (
 		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")
@@ -34,7 +34,7 @@ func (w *Windows) setup(stream syscall.Handle, enable bool) error {
 		mode &^= ENABLE_VIRTUAL_TERMINAL_PROCESSING
 	}
 
-	ret, _, err := setConsoleMode.Call(uintptr(stream), uintptr(mode))
+	ret, _, err := setConsoleMode.Call(uintptr(syscall.Stdout), uintptr(mode))
 	if ret == 0 {
 		return err
 	}

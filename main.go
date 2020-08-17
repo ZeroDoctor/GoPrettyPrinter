@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
-	"syscall"
 )
 
 // Flags and Colors
@@ -57,7 +56,7 @@ var (
 // OSI : need to find a better way to do this
 type OSI interface {
 	getName() string
-	setup(syscall.Handle, bool) error
+	setup(bool) error
 }
 
 // SetOS :
@@ -66,7 +65,7 @@ func SetOS(os OSI) {
 		return
 	}
 
-	os.setup(syscall.Stdout, true)
+	os.setup(true)
 
 	BLU = "\x1b[1;34m"
 	YEL = "\x1b[1;33m"

@@ -55,17 +55,23 @@ var (
 
 // OSI : need to find a better way to do this
 type OSI interface {
-	getName() string
 	setup(bool) error
 }
 
+type platform struct{}
+
 // SetOS :
-func SetOS(os OSI) {
-	if os.getName() != "windows" {
+func SetOS(os string) {
+	if os != "windows" {
 		return
 	}
 
-	os.setup(true)
+	plat := &platform{}
+	err := plat.setup(true)
+	if err != nil {
+		fmt.Println("ERROR: could not setup windows")
+		panic(err)
+	}
 
 	BLU = "\x1b[1;34m"
 	YEL = "\x1b[1;33m"

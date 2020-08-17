@@ -4,17 +4,7 @@ package ppt
 
 import "syscall"
 
-// Windows :
-type Windows struct {
-	name string
-}
-
-func (w *Windows) getName() string {
-	return w.name
-}
-
-func (w *Windows) setup(enable bool) error {
-
+func (w *platform) setup(enable bool) error {
 	var (
 		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")
 		setConsoleMode *syscall.LazyProc = kernel32Dll.NewProc("SetConsoleMode")

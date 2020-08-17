@@ -53,6 +53,28 @@ var (
 	}
 )
 
+// SetOS :
+func SetOS(os string) {
+	if os != "windows" {
+		return
+	}
+
+	BLU = "\x1b[1;34m"
+	YEL = "\x1b[1;33m"
+	RED = "\x1b[1;31m"
+	GRE = "\x1b[1;32m"
+	FAT = "\x1b[1;31;103m"
+	cRST = "\x1b[0m"
+
+	logType = [5]string{
+		BLU + "INFO" + cRST,
+		YEL + "WARN" + cRST,
+		RED + "ERROR" + cRST,
+		GRE + "VBOSE" + cRST,
+		FAT + "FATAL" + cRST,
+	}
+}
+
 // SetInfoColor :
 func SetInfoColor(color string) {
 	logType[pINFO] = color + "INFO" + cRST

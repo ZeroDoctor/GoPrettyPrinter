@@ -7,31 +7,31 @@ import (
 	"syscall"
 )
 
-func (w *platform) setup(enable bool) error {
+func setup(enable bool) (bool, error) {
 	fmt.Println("Setting up for windows...")
 	var (
 		kernel32Dll    *syscall.LazyDLL  = syscall.NewLazyDLL("Kernel32.dll")
 		setConsoleMode *syscall.LazyProc = kernel32Dll.NewProc("SetConsoleMode")
 	)
 
-	const ENABLE_VIRTUAL_TERMINAL_PROCESSING uint32 = 0x4
+	const EnableVirtualTerminalProcessing uint32 = 0x4
 
 	var mode uint32
 	err := syscall.GetConsoleMode(syscall.Stdout, &mode)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if enable {
-		mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+		mode |= EnableVirtualTerminalProcessing
 	} else {
-		mode &^= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+		mode &^= EnableVirtualTerminalProcessing
 	}
 
 	ret, _, err := setConsoleMode.Call(uintptr(syscall.Stdout), uintptr(mode))
 	if ret == 0 {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }

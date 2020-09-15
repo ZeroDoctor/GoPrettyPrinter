@@ -2,6 +2,6 @@
 
 package ppt
 
-func (l *platform) setup(enable bool) error {
-	return nil
+func setup(enable bool) (bool, error) {
+	return false, nil
 }

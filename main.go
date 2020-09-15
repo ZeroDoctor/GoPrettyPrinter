@@ -31,12 +31,14 @@ type lFlag uint8
 
 // some Log prefixs
 var (
-	BLU  = "\033[1;34m"
-	YEL  = "\033[1;33m"
-	RED  = "\033[1;31m"
-	GRE  = "\033[1;32m"
-	FAT  = "\033[1;31;103m"
-	cRST = "\033[0m"
+	BLU       = "\033[1;34m"
+	YEL       = "\033[1;33m"
+	RED       = "\033[1;31m"
+	GRE       = "\033[1;32m"
+	FAT       = "\033[1;31;103m"
+	cRST      = "\033[0m"
+	clear     = "\033[2J"
+	rstCursor = "\033[1;1H"
 
 	LoggerFlags    lFlag = 0
 	DisplayWarning       = true
@@ -53,40 +55,42 @@ var (
 	}
 )
 
-// OSI : need to find a better way to do this
-type OSI interface {
-	setup(bool) error
-}
-
-type platform struct{}
-
-// SetOS :
-func SetOS(os string) {
-	if os != "windows" {
-		return
-	}
-
-	plat := &platform{}
-	err := plat.setup(true)
+// Init : setup colors based on OS
+func Init() {
+	windows, err := setup(true)
 	if err != nil {
-		fmt.Println("ERROR: could not setup windows")
+		fmt.Println("ERROR: could not setup os")
 		panic(err)
 	}
 
-	BLU = "\x1b[1;34m"
-	YEL = "\x1b[1;33m"
-	RED = "\x1b[1;31m"
-	GRE = "\x1b[1;32m"
-	FAT = "\x1b[1;31;103m"
-	cRST = "\x1b[0m"
+	if windows {
+		BLU = "\x1b[1;34m"
+		YEL = "\x1b[1;33m"
+		RED = "\x1b[1;31m"
+		GRE = "\x1b[1;32m"
+		FAT = "\x1b[1;31;103m"
+		cRST = "\x1b[0m"
+		clear = "\x1b[2J"
+		rstCursor = "\x1b[1;1H"
 
-	logType = [5]string{
-		BLU + "INFO" + cRST,
-		YEL + "WARN" + cRST,
-		RED + "ERROR" + cRST,
-		GRE + "VBOSE" + cRST,
-		FAT + "FATAL" + cRST,
+		logType = [5]string{
+			BLU + "INFO" + cRST,
+			YEL + "WARN" + cRST,
+			RED + "ERROR" + cRST,
+			GRE + "VBOSE" + cRST,
+			FAT + "FATAL" + cRST,
+		}
 	}
+}
+
+// Clear : clears console
+func Clear() {
+	fmt.Print(clear)
+}
+
+// ResetCursor : move cursor to the upper left corner
+func ResetCursor() {
+	fmt.Print(rstCursor)
 }
 
 // SetInfoColor :

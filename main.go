@@ -15,7 +15,7 @@ const (
 	pVBOSE
 	pFATAL
 
-	FUNC = lFlag(1 << iota)
+	FUNC = lFlag(1 << (iota - 5))
 	LINE
 	FILE
 )

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -31,10 +32,11 @@ type lFlag uint8
 
 // some Log prefixs
 var (
-	BLU       = "\033[1;34m"
-	YEL       = "\033[1;33m"
-	RED       = "\033[1;31m"
-	GRE       = "\033[1;32m"
+	begin     = "\033[1;" // forced 1;
+	IFO       = "\033[1;34m"
+	WRN       = "\033[1;33m"
+	ERR       = "\033[1;31m"
+	VER       = "\033[1;32m"
 	FAT       = "\033[1;31;103m"
 	cRST      = "\033[0m"
 	clear     = "\033[2J"
@@ -47,37 +49,94 @@ var (
 
 	depth   = -1
 	logType = [5]string{
-		BLU + "INFO" + cRST,
-		YEL + "WARN" + cRST,
-		RED + "ERROR" + cRST,
-		GRE + "VBOSE" + cRST,
+		IFO + "INFO" + cRST,
+		WRN + "WARN" + cRST,
+		ERR + "ERROR" + cRST,
+		VER + "VBOSE" + cRST,
 		FAT + "FATAL" + cRST,
 	}
 )
+
+type colors string
+
+const (
+	// Black :
+	Black = colors("30")
+	// Red :
+	Red = colors("31")
+	// Green :
+	Green = colors("32")
+	// Yellow :
+	Yellow = colors("33")
+	// Blue :
+	Blue = colors("34")
+	// Magenta :
+	Magenta = colors("35")
+	// Cyan :
+	Cyan = colors("36")
+	// White :
+	White = colors("37")
+
+	// Gray : a brighter black
+	Gray = colors("90")
+	// BRed : a brighter red
+	BRed = colors("91")
+	// BGreen : a brighter green
+	BGreen = colors("92")
+	// BYellow : a brighter yellow
+	BYellow = colors("93")
+	// BBlue : a brighter blue
+	BBlue = colors("94")
+	// BMagenta : a brighter magenta
+	BMagenta = colors("95")
+	// BCyan : a brighter cyan
+	BCyan = colors("96")
+	// BWhite : a brighter white
+	BWhite = colors("97")
+)
+
+// GetColor : return formatted ansi escape color
+func GetColor(color colors) string {
+	return begin + string(color) + "m"
+}
+
+// ToBackground : convert colors to background colors
+func ToBackground(color colors) string {
+	colorNum, err := strconv.Atoi(string(color))
+	if err != nil {
+		fmt.Println("ERROR (PrettyPrinter): could not convert color to background color")
+		return string(color)
+	}
+
+	colorNum += 10
+	newColor := strconv.Itoa(colorNum)
+	return newColor
+}
 
 // Init : setup colors based on OS
 func Init() {
 	windows, err := setup(true)
 	if err != nil {
-		fmt.Println("ERROR: could not setup os")
+		fmt.Println("ERROR (PrettyPrinter): could not setup os")
 		panic(err)
 	}
 
 	if windows {
-		BLU = "\x1b[1;34m"
-		YEL = "\x1b[1;33m"
-		RED = "\x1b[1;31m"
-		GRE = "\x1b[1;32m"
+		begin = "\x1b[1;"
+		IFO = "\x1b[1;34m"
+		WRN = "\x1b[1;33m"
+		ERR = "\x1b[1;31m"
+		VER = "\x1b[1;32m"
 		FAT = "\x1b[1;31;103m"
 		cRST = "\x1b[0m"
 		clear = "\x1b[2J"
 		rstCursor = "\x1b[1;1H"
 
 		logType = [5]string{
-			BLU + "INFO" + cRST,
-			YEL + "WARN" + cRST,
-			RED + "ERROR" + cRST,
-			GRE + "VBOSE" + cRST,
+			IFO + "INFO" + cRST,
+			WRN + "WARN" + cRST,
+			ERR + "ERROR" + cRST,
+			VER + "VBOSE" + cRST,
 			FAT + "FATAL" + cRST,
 		}
 	}
@@ -91,6 +150,11 @@ func Clear() {
 // ResetCursor : move cursor to the upper left corner
 func ResetCursor() {
 	fmt.Print(rstCursor)
+}
+
+// ResetColor : changes consoles' colors back to normal
+func ResetColor() string {
+	return cRST
 }
 
 // SetInfoColor :

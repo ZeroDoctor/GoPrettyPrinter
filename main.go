@@ -57,51 +57,49 @@ var (
 	}
 )
 
-type colors string
-
 const (
 	// Black :
-	Black = colors("30")
+	Black = "30"
 	// Red :
-	Red = colors("31")
+	Red = "31"
 	// Green :
-	Green = colors("32")
+	Green = "32"
 	// Yellow :
-	Yellow = colors("33")
+	Yellow = "33"
 	// Blue :
-	Blue = colors("34")
+	Blue = "34"
 	// Magenta :
-	Magenta = colors("35")
+	Magenta = "35"
 	// Cyan :
-	Cyan = colors("36")
+	Cyan = "36"
 	// White :
-	White = colors("37")
+	White = "37"
 
 	// Gray : a brighter black
-	Gray = colors("90")
+	Gray = "90"
 	// BRed : a brighter red
-	BRed = colors("91")
+	BRed = "91"
 	// BGreen : a brighter green
-	BGreen = colors("92")
+	BGreen = "92"
 	// BYellow : a brighter yellow
-	BYellow = colors("93")
+	BYellow = "93"
 	// BBlue : a brighter blue
-	BBlue = colors("94")
+	BBlue = "94"
 	// BMagenta : a brighter magenta
-	BMagenta = colors("95")
+	BMagenta = "95"
 	// BCyan : a brighter cyan
-	BCyan = colors("96")
+	BCyan = "96"
 	// BWhite : a brighter white
-	BWhite = colors("97")
+	BWhite = "97"
 )
 
 // GetColor : return formatted ansi escape color
-func GetColor(color colors) string {
+func GetColor(color string) string {
 	return begin + string(color) + "m"
 }
 
 // ToBackground : convert colors to background colors
-func ToBackground(color colors) string {
+func ToBackground(color string) string {
 	colorNum, err := strconv.Atoi(string(color))
 	if err != nil {
 		fmt.Println("ERROR (PrettyPrinter): could not convert color to background color")

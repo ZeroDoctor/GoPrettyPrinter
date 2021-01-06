@@ -185,134 +185,126 @@ func SetFatalColor(color string) {
 // ###################### Format Log ######################
 
 // Infof : logs info
-func Infof(msg string, args ...interface{}) {
-	depth = 5
+func Infof(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	Info(str)
-	depth = -1
+	return Printer(pINFO, str)
 }
 
 // Warnf :
-func Warnf(msg string, args ...interface{}) {
-	depth = 5
+func Warnf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	Warn(str)
-	depth = -1
+	return Printer(pWARN, str)
 }
 
 // Errorf :
-func Errorf(msg string, args ...interface{}) {
-	depth = 5
+func Errorf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	Error(str)
-	depth = -1
+	return Printer(pERROR, str)
 }
 
 // Verbosef :
-func Verbosef(msg string, args ...interface{}) {
-	depth = 5
+func Verbosef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	Verbose(str)
-	depth = -1
+	return Printer(pVBOSE, str)
 }
 
 // Fatalf :
-func Fatalf(msg string, args ...interface{}) {
-	depth = 5
+func Fatalf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	Fatal(str)
-	depth = -1
+	return Printer(pFATAL, str)
 }
 
 // ###################### NewLine Log ######################
 
 // Infoln :
-func Infoln(args ...interface{}) {
+func Infoln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(pINFO, msg)
+	return Printer(pINFO, msg)
 }
 
 // Warnln :
-func Warnln(args ...interface{}) {
+func Warnln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(pWARN, msg)
+	return Printer(pWARN, msg)
 }
 
 // Errorln :
-func Errorln(args ...interface{}) {
+func Errorln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(pERROR, msg)
+	return Printer(pERROR, msg)
 }
 
 // Verboseln :
-func Verboseln(args ...interface{}) {
+func Verboseln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(pVBOSE, msg)
+	return Printer(pVBOSE, msg)
 }
 
 // Fatalln :
-func Fatalln(args ...interface{}) {
+func Fatalln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	Printer(pFATAL, msg)
+	return Printer(pFATAL, msg)
 }
 
 // ###################### Non-Format Log ######################
 
 // Info :
-func Info(args ...interface{}) {
+func Info(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(pINFO, msg)
+	return Printer(pINFO, msg)
 }
 
 // Warn :
-func Warn(args ...interface{}) {
+func Warn(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(pWARN, msg)
+	return Printer(pWARN, msg)
 }
 
 // Error :
-func Error(args ...interface{}) {
+func Error(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(pERROR, msg)
+	return Printer(pERROR, msg)
 }
 
 // Verbose :
-func Verbose(args ...interface{}) {
+func Verbose(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(pVBOSE, msg)
+	return Printer(pVBOSE, msg)
 }
 
 // Fatal :
-func Fatal(args ...interface{}) {
+func Fatal(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	Printer(pFATAL, msg)
+	return Printer(pFATAL, msg)
 }
 
 // ###################### The Big Boy on the Block ######################
 
 // Printer :
-func Printer(prefix uint8, msg string) {
-	fmt.Print(logType[prefix] + swap(Order) + msg)
+func Printer(prefix uint8, msg string) string {
+	result := logType[prefix] + swap(Order) + msg
+	fmt.Print(result)
+	return result
 }
 
 // ###################### Decorator ######################
@@ -330,8 +322,8 @@ const (
 var (
 	decor = [4]string{
 		":",
-		" {",
-		"}->",
+		" [",
+		"]-",
 		"|",
 	}
 )

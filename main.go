@@ -16,9 +16,9 @@ const (
 	pVBOSE
 	pFATAL
 
-	FUNC = lFlag(1 << (iota - 5))
-	LINE
-	FILE
+	FUNC = lFlag(1 << (iota - 5)) // enables function name to be include in log
+	LINE                          // enables line number to be include in log
+	FILE                          // enables file name to be include in log
 )
 
 func defaultPrefix() func() string {
@@ -27,24 +27,24 @@ func defaultPrefix() func() string {
 	}
 }
 
-// lFlag : to prevent others from accidently messing with it
+// lFlag to prevent others from accidently messing with it
 type lFlag uint8
 
 // some Log prefixs
 var (
-	begin     = "\033[1;" // forced 1;
-	IFO       = "\033[1;34m"
-	WRN       = "\033[1;33m"
-	ERR       = "\033[1;31m"
-	VER       = "\033[1;32m"
-	FAT       = "\033[1;31;103m"
+	begin     = "\033[1;"        // forced 1;
+	IFO       = "\033[1;34m"     // default info's log foreground color to regular blue
+	WRN       = "\033[1;33m"     // default warn's log foreground color to regular yellow
+	ERR       = "\033[1;31m"     // default error's log foreground color to regular red
+	VER       = "\033[1;32m"     // default verbose's log foreground color to regular green
+	FAT       = "\033[1;31;103m" // default fatal's log color foreground to red and background to yellowish
 	cRST      = "\033[0m"
 	clear     = "\033[2J"
 	rstCursor = "\033[1;1H"
 
 	LoggerFlags    lFlag = 0
-	DisplayWarning       = true
-	Order                = false
+	DisplayWarning       = true            // displaying pointer warning is on by default
+	Order                = false           // changes the order of LoggerFlags prefix
 	LoggerPrefix         = defaultPrefix() // goes after the log type and file|func|line info
 
 	depth   = -1
@@ -60,47 +60,47 @@ var (
 type colors string
 
 const (
-	// Black :
+	// Black regular black
 	Black = colors("30")
-	// Red :
+	// Red regular red
 	Red = colors("31")
-	// Green :
+	// Green regular green
 	Green = colors("32")
-	// Yellow :
+	// Yellow regular yellow
 	Yellow = colors("33")
-	// Blue :
+	// Blue regular blue
 	Blue = colors("34")
-	// Magenta :
+	// Magenta regular magenta
 	Magenta = colors("35")
-	// Cyan :
+	// Cyan regular cyan
 	Cyan = colors("36")
-	// White :
+	// White regular white
 	White = colors("37")
 
-	// Gray : a brighter black
+	// Gray a brighter black
 	Gray = colors("90")
-	// BRed : a brighter red
+	// BRed a brighter red
 	BRed = colors("91")
-	// BGreen : a brighter green
+	// BGreen a brighter green
 	BGreen = colors("92")
-	// BYellow : a brighter yellow
+	// BYellow a brighter yellow
 	BYellow = colors("93")
-	// BBlue : a brighter blue
+	// BBlue a brighter blue
 	BBlue = colors("94")
-	// BMagenta : a brighter magenta
+	// BMagenta a brighter magenta
 	BMagenta = colors("95")
-	// BCyan : a brighter cyan
+	// BCyan a brighter cyan
 	BCyan = colors("96")
-	// BWhite : a brighter white
+	// BWhite a brighter white
 	BWhite = colors("97")
 )
 
-// GetColor : return formatted ansi escape color
+// GetColor return formatted ansi escape color
 func GetColor(color colors) string {
 	return begin + string(color) + "m"
 }
 
-// ToBackground : convert colors to background colors
+// ToBackground convert colors to background colors
 func ToBackground(color colors) string {
 	colorNum, err := strconv.Atoi(string(color))
 	if err != nil {
@@ -113,7 +113,7 @@ func ToBackground(color colors) string {
 	return newColor
 }
 
-// Init : setup colors based on OS
+// Init setup colors based on OS
 func Init() {
 	windows, err := setup(true)
 	if err != nil {
@@ -142,73 +142,68 @@ func Init() {
 	}
 }
 
-// Clear : clears console
+// Clear clears console
 func Clear() {
 	fmt.Print(clear)
 }
 
-// ResetCursor : move cursor to the upper left corner
+// ResetCursor move cursor to the upper left corner
 func ResetCursor() {
 	fmt.Print(rstCursor)
 }
 
-// ResetColor : changes consoles' colors back to normal
+// ResetColor changes consoles' colors back to normal
 func ResetColor() string {
 	return cRST
 }
 
-// SetInfoColor :
-func SetInfoColor(color string) {
-	logType[pINFO] = color + "INFO" + cRST
+// SetInfoColor change the color of info log
+func SetInfoColor(color colors) {
+	logType[pINFO] = string(color) + "INFO" + cRST
 }
 
-// SetWarnColor :
-func SetWarnColor(color string) {
-	logType[pWARN] = color + "WARN" + cRST
+// SetWarnColor change the color of warn log
+func SetWarnColor(color colors) {
+	logType[pWARN] = string(color) + "WARN" + cRST
 }
 
-// SetErrorColor :
-func SetErrorColor(color string) {
-	logType[pERROR] = color + "ERROR" + cRST
+// SetErrorColor change the color of error log
+func SetErrorColor(color colors) {
+	logType[pERROR] = string(color) + "ERROR" + cRST
 }
 
-// SetVerboseColor :
-func SetVerboseColor(color string) {
-	logType[pVBOSE] = color + "VBOSE" + cRST
+// SetVerboseColor change the color of verbose log
+func SetVerboseColor(color colors) {
+	logType[pVBOSE] = string(color) + "VBOSE" + cRST
 }
 
-// SetFatalColor :
-func SetFatalColor(color string) {
-	logType[pFATAL] = color + "FATAL" + cRST
+// SetFatalColor change the color of fatal log
+func SetFatalColor(color colors) {
+	logType[pFATAL] = string(color) + "FATAL" + cRST
 }
 
 // ###################### Format Log ######################
 
-// Infof : logs info
 func Infof(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pINFO, str)
 }
 
-// Warnf :
 func Warnf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pWARN, str)
 }
 
-// Errorf :
 func Errorf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pERROR, str)
 }
 
-// Verbosef :
 func Verbosef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pVBOSE, str)
 }
 
-// Fatalf :
 func Fatalf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pFATAL, str)
@@ -216,7 +211,6 @@ func Fatalf(msg string, args ...interface{}) string {
 
 // ###################### NewLine Log ######################
 
-// Infoln :
 func Infoln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -224,7 +218,6 @@ func Infoln(args ...interface{}) string {
 	return Printer(pINFO, msg)
 }
 
-// Warnln :
 func Warnln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -232,7 +225,6 @@ func Warnln(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
-// Errorln :
 func Errorln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -240,7 +232,6 @@ func Errorln(args ...interface{}) string {
 	return Printer(pERROR, msg)
 }
 
-// Verboseln :
 func Verboseln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -248,7 +239,6 @@ func Verboseln(args ...interface{}) string {
 	return Printer(pVBOSE, msg)
 }
 
-// Fatalln :
 func Fatalln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -258,7 +248,6 @@ func Fatalln(args ...interface{}) string {
 
 // ###################### Non-Format Log ######################
 
-// Info :
 func Info(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -266,7 +255,6 @@ func Info(args ...interface{}) string {
 	return Printer(pINFO, msg)
 }
 
-// Warn :
 func Warn(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -274,7 +262,6 @@ func Warn(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
-// Error :
 func Error(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -282,7 +269,6 @@ func Error(args ...interface{}) string {
 	return Printer(pERROR, msg)
 }
 
-// Verbose :
 func Verbose(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -290,7 +276,6 @@ func Verbose(args ...interface{}) string {
 	return Printer(pVBOSE, msg)
 }
 
-// Fatal :
 func Fatal(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -300,7 +285,7 @@ func Fatal(args ...interface{}) string {
 
 // ###################### The Big Boy on the Block ######################
 
-// Printer :
+// Printer output msg to console with a desire log type prefix
 func Printer(prefix uint8, msg string) string {
 	result := logType[prefix] + swap(Order) + msg
 	fmt.Print(result)
@@ -309,7 +294,7 @@ func Printer(prefix uint8, msg string) string {
 
 // ###################### Decorator ######################
 
-// lDECOR : just another uint8 type
+// lDECOR just another uint8 type
 type lDECOR uint8
 
 const (
@@ -328,11 +313,12 @@ var (
 	}
 )
 
-// Decorator : $log_type = [info|warn|error] $log_info = [file|func|line] $extra_prefix is developer define prefix
-//	[0] = between prefix i.e. $log_type $log_info ':' $extra_prefix $msg
-//	[1] = after log type i.e. $log_type '{' $log_info $extra_prefix $msg
-//	[2] = after log info i.e. $log_type $log_info '}' $extra_prefix $msg
-//	[3] = seperator in $log_info i.e. file '|' func '|' line
+// Decorator $log_type = [info|warn|error] $log_info = [file|func|line] $extra_prefix is developer define prefix
+//
+// [0] = between prefix i.e. $log_type $log_info ':' $extra_prefix $msg
+// [1] = after log type i.e. $log_type '{' $log_info $extra_prefix $msg
+// [2] = after log info i.e. $log_type $log_info '}' $extra_prefix $msg
+// [3] = seperator in $log_info i.e. file '|' func '|' line
 func Decorator(args ...string) {
 	if len(args) > 5 {
 		Warn("PPrinter -- There are only 4 options\n")

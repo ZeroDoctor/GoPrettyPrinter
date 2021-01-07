@@ -47,7 +47,14 @@ var (
 	Order                = false           // changes the order of LoggerFlags prefix
 	LoggerPrefix         = defaultPrefix() // goes after the log type and file|func|line info
 
-	depth   = -1
+	depth      = -1
+	displayLog = [5]string{
+		"INFO",
+		"WARN",
+		"ERRO",
+		"VBSE",
+		"FATL",
+	}
 	logType = [5]string{
 		IFO + "INFO" + cRST,
 		WRN + "WARN" + cRST,
@@ -289,7 +296,7 @@ func Fatal(args ...interface{}) string {
 func Printer(prefix uint8, msg string) string {
 	result := logType[prefix] + swap(Order) + msg
 	fmt.Print(result)
-	return result
+	return displayLog[prefix] + ": " + msg
 }
 
 // ###################### Decorator ######################

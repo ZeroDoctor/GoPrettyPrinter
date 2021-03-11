@@ -23,25 +23,15 @@ const (
 
 func defaultPrefix() func() string {
 	return func() string {
-		return " "
+		return ": "
 	}
 }
 
 // lFlag to prevent others from accidently messing with it
 type lFlag uint8
 
-// some Log prefixs
+// List of log prefixs
 var (
-	begin     = "\033[1;"        // forced 1;
-	IFO       = "\033[1;34m"     // default info's log foreground color to regular blue
-	WRN       = "\033[1;33m"     // default warn's log foreground color to regular yellow
-	ERR       = "\033[1;31m"     // default error's log foreground color to regular red
-	VER       = "\033[1;32m"     // default verbose's log foreground color to regular green
-	FAT       = "\033[1;31;103m" // default fatal's log color foreground to red and background to yellowish
-	cRST      = "\033[0m"
-	clear     = "\033[2J"
-	rstCursor = "\033[1;1H"
-
 	LoggerFlags    lFlag = 0
 	DisplayWarning       = true            // displaying pointer warning is on by default
 	Order                = false           // changes the order of LoggerFlags prefix
@@ -55,6 +45,7 @@ var (
 		"VBSE",
 		"FATL",
 	}
+
 	logType = [5]string{
 		IFO + "INFO" + cRST,
 		WRN + "WARN" + cRST,
@@ -122,30 +113,10 @@ func ToBackground(color colors) string {
 
 // Init setup colors based on OS
 func Init() {
-	windows, err := setup(true)
+	_, err := setup(true)
 	if err != nil {
 		fmt.Println("ERROR (PrettyPrinter): could not setup os")
 		panic(err)
-	}
-
-	if windows {
-		begin = "\x1b[1;"
-		IFO = "\x1b[1;34m"
-		WRN = "\x1b[1;33m"
-		ERR = "\x1b[1;31m"
-		VER = "\x1b[1;32m"
-		FAT = "\x1b[1;31;103m"
-		cRST = "\x1b[0m"
-		clear = "\x1b[2J"
-		rstCursor = "\x1b[1;1H"
-
-		logType = [5]string{
-			IFO + "INFO" + cRST,
-			WRN + "WARN" + cRST,
-			ERR + "ERROR" + cRST,
-			VER + "VBOSE" + cRST,
-			FAT + "FATAL" + cRST,
-		}
 	}
 }
 
@@ -166,51 +137,61 @@ func ResetColor() string {
 
 // SetInfoColor change the color of info log
 func SetInfoColor(color colors) {
-	logType[pINFO] = string(color) + "INFO" + cRST
+	logType[pINFO] = GetColor(color) + "INFO" + cRST
 }
 
 // SetWarnColor change the color of warn log
 func SetWarnColor(color colors) {
-	logType[pWARN] = string(color) + "WARN" + cRST
+	logType[pWARN] = GetColor(color) + "WARN" + cRST
 }
 
 // SetErrorColor change the color of error log
 func SetErrorColor(color colors) {
-	logType[pERROR] = string(color) + "ERROR" + cRST
+	logType[pERROR] = GetColor(color) + "ERROR" + cRST
 }
 
 // SetVerboseColor change the color of verbose log
 func SetVerboseColor(color colors) {
-	logType[pVBOSE] = string(color) + "VBOSE" + cRST
+	logType[pVBOSE] = GetColor(color) + "VBOSE" + cRST
 }
 
 // SetFatalColor change the color of fatal log
 func SetFatalColor(color colors) {
-	logType[pFATAL] = string(color) + "FATAL" + cRST
+	logType[pFATAL] = GetColor(color) + "FATAL" + cRST
 }
 
 // ###################### Format Log ######################
 
+// Infof formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
 func Infof(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pINFO, str)
 }
 
+// Warnf formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
 func Warnf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pWARN, str)
 }
 
+// Errorf formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
 func Errorf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pERROR, str)
 }
 
+// Verbosef formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
 func Verbosef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pVBOSE, str)
 }
 
+// Fatalf formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
 func Fatalf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
 	return Printer(pFATAL, str)
@@ -218,6 +199,9 @@ func Fatalf(msg string, args ...interface{}) string {
 
 // ###################### NewLine Log ######################
 
+// Infoln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
 func Infoln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -225,6 +209,9 @@ func Infoln(args ...interface{}) string {
 	return Printer(pINFO, msg)
 }
 
+// Warnln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
 func Warnln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -232,6 +219,9 @@ func Warnln(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
+// Errorln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
 func Errorln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -239,6 +229,9 @@ func Errorln(args ...interface{}) string {
 	return Printer(pERROR, msg)
 }
 
+// Verboseln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
 func Verboseln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -246,6 +239,9 @@ func Verboseln(args ...interface{}) string {
 	return Printer(pVBOSE, msg)
 }
 
+// Fatalln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
 func Fatalln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -255,6 +251,9 @@ func Fatalln(args ...interface{}) string {
 
 // ###################### Non-Format Log ######################
 
+// Info formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
 func Info(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -262,6 +261,9 @@ func Info(args ...interface{}) string {
 	return Printer(pINFO, msg)
 }
 
+// Warn formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
 func Warn(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -269,6 +271,9 @@ func Warn(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
+// Error formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
 func Error(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -276,6 +281,9 @@ func Error(args ...interface{}) string {
 	return Printer(pERROR, msg)
 }
 
+// Verbose formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
 func Verbose(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -283,6 +291,9 @@ func Verbose(args ...interface{}) string {
 	return Printer(pVBOSE, msg)
 }
 
+// Fatal formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
 func Fatal(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
@@ -294,9 +305,9 @@ func Fatal(args ...interface{}) string {
 
 // Printer output msg to console with a desire log type prefix
 func Printer(prefix uint8, msg string) string {
-	result := logType[prefix] + swap(Order) + msg
+	result := logType[prefix] + LoggerPrefix() + msg
 	fmt.Print(result)
-	return displayLog[prefix] + ": " + msg
+	return displayLog[prefix] + LoggerPrefix() + msg
 }
 
 // ###################### Decorator ######################
@@ -305,30 +316,27 @@ func Printer(prefix uint8, msg string) string {
 type lDECOR uint8
 
 const (
-	betweenPrefix lDECOR = iota
-	afterType
-	afterInfo
+	afterType lDECOR = iota
 	seperator
+	afterInfo
 )
 
 var (
-	decor = [4]string{
-		":",
-		" [",
-		"]-",
+	decor = [3]string{
+		"[",
 		"|",
+		"]",
 	}
 )
 
 // Decorator $log_type = [info|warn|error] $log_info = [file|func|line] $extra_prefix is developer define prefix
 //
-// [0] = between prefix i.e. $log_type $log_info ':' $extra_prefix $msg
-// [1] = after log type i.e. $log_type '{' $log_info $extra_prefix $msg
-// [2] = after log info i.e. $log_type $log_info '}' $extra_prefix $msg
-// [3] = seperator in $log_info i.e. file '|' func '|' line
+// [0] = after log type i.e. $log_type '[' $log_info $extra_prefix $msg
+// [1] = seperator in $log_info i.e. file '|' func '|' line
+// [2] = after log info i.e. $log_type $log_info ']' $extra_prefix $msg
 func Decorator(args ...string) {
-	if len(args) > 5 {
-		Warn("PPrinter -- There are only 4 options\n")
+	if len(args) > 3 {
+		Warn("PPrinter -- There are only 3 options\n")
 	}
 
 	for i, a := range args {
@@ -336,32 +344,11 @@ func Decorator(args ...string) {
 	}
 }
 
-// ###################### Utils ######################
-
-func checkPointerType(args ...interface{}) []interface{} {
-	if !DisplayWarning {
-		return args
-	}
-
-	for _, a := range args {
-		switch reflect.ValueOf(a).Kind() {
-		case reflect.Ptr:
-			Warn("PPrinter -- is Displaying a Pointer\n")
-		}
-	}
-
-	return args
-}
-
-func swap(order bool) string {
-	if order {
-		return LoggerPrefix() + decor[betweenPrefix] + whereAmI(LoggerFlags)
-	}
-
-	return whereAmI(LoggerFlags) + decor[betweenPrefix] + LoggerPrefix()
-}
-
-func whereAmI(flag lFlag) string {
+// WhereAmI gives the func, file or line of when the log was called
+// func, file and line are activiated with LoggerFlags with
+// bits FUNC, FILE, LINE
+func WhereAmI() string {
+	flag := LoggerFlags
 	if flag == 0 {
 		return ""
 	}
@@ -398,6 +385,23 @@ func whereAmI(flag lFlag) string {
 	}
 
 	return format + decor[afterInfo]
+}
+
+// ###################### Utils ######################
+
+func checkPointerType(args ...interface{}) []interface{} {
+	if !DisplayWarning {
+		return args
+	}
+
+	for _, a := range args {
+		switch reflect.ValueOf(a).Kind() {
+		case reflect.Ptr:
+			Warn("PPrinter -- is Displaying a Pointer\n")
+		}
+	}
+
+	return args
 }
 
 func getFormatStr(length int) string {

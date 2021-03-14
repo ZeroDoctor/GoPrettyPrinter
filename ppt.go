@@ -8,17 +8,51 @@ import (
 	"strings"
 )
 
+// Log set custom types
+type Log uint16
+type Level uint16
+
 // Flags and Colors
 const (
-	pINFO = iota
+	pFATA Log = iota
+	pERRO
 	pWARN
-	pERROR
-	pVBOSE
-	pFATAL
+	pINFO
+	pVBSE
+	pTRCE
+)
 
-	FUNC = lFlag(1 << (iota - 5)) // enables function name to be include in log
-	LINE                          // enables line number to be include in log
-	FILE                          // enables file name to be include in log
+const (
+	// FUNC enable function call lookup in WhereAmI()
+	FUNC = lFlag(1 << iota) // enables function name to be include in log
+	// LINE enable line call lookup in WhereAmI()
+	LINE // enables line number to be include in log
+	// FILE enable line call lookup in WhereAmI()
+	FILE // enables file name to be include in log
+)
+
+const (
+	// lvlFATA the level for logging fatal
+	lvlFATA = 1 << iota
+	// lvlERRO the level for logging error
+	lvlERRO
+	// lvlWARN the level for logging warn
+	lvlWARN
+	// lvlINFO the level for logging info
+	lvlINFO
+	// lvlVBSE the level for logging verbose
+	lvlVBSE
+	// lvlTRCE the level for logging trace
+	lvlTRCE
+)
+
+const (
+	FatalLevel   Level = lvlFATA
+	ErrorLevel   Level = lvlFATA | lvlERRO
+	WarnLevel    Level = lvlFATA | lvlERRO | lvlWARN
+	InfoLevel    Level = lvlFATA | lvlERRO | lvlWARN | lvlINFO
+	VerboseLevel Level = lvlFATA | lvlERRO | lvlWARN | lvlINFO | lvlVBSE
+	TraceLevel   Level = lvlFATA | lvlERRO | lvlWARN | lvlINFO | lvlVBSE | lvlTRCE
 )
 
 func defaultPrefix() func() string {
@@ -38,68 +72,73 @@ var (
 	LoggerPrefix         = defaultPrefix() // goes after the log type and file|func|line info
 
 	depth      = -1
-	displayLog = [5]string{
-		"INFO",
-		"WARN",
-		"ERRO",
-		"VBSE",
+	displayLog = [6]string{
 		"FATL",
+		"ERRO",
+		"WARN",
+		"INFO",
+		"VBSE",
+		"TRAC",
 	}
 
-	logType = [5]string{
-		IFO + "INFO" + cRST,
+	logType = [6]string{
+		FAT + "FATA" + cRST,
+		ERR + "ERRO" + cRST,
 		WRN + "WARN" + cRST,
-		ERR + "ERROR" + cRST,
-		VER + "VBOSE" + cRST,
-		FAT + "FATAL" + cRST,
+		IFO + "INFO" + cRST,
+		VER + "VBSE" + cRST,
+		TRA + "TRAC" + cRST,
 	}
+
+	currentLevel = lvlFATA | lvlERRO | lvlWARN | lvlINFO
 )
 
-type colors string
+// Colors <-
+type Colors string
 
 const (
 	// Black regular black
-	Black = colors("30")
+	Black = Colors("30")
 	// Red regular red
-	Red = colors("31")
+	Red = Colors("31")
 	// Green regular green
-	Green = colors("32")
+	Green = Colors("32")
 	// Yellow regular yellow
-	Yellow = colors("33")
+	Yellow = Colors("33")
 	// Blue regular blue
-	Blue = colors("34")
+	Blue = Colors("34")
 	// Magenta regular magenta
-	Magenta = colors("35")
+	Magenta = Colors("35")
 	// Cyan regular cyan
-	Cyan = colors("36")
+	Cyan = Colors("36")
 	// White regular white
-	White = colors("37")
+	White = Colors("37")
 
 	// Gray a brighter black
-	Gray = colors("90")
+	Gray = Colors("90")
 	// BRed a brighter red
-	BRed = colors("91")
+	BRed = Colors("91")
 	// BGreen a brighter green
-	BGreen = colors("92")
+	BGreen = Colors("92")
 	// BYellow a brighter yellow
-	BYellow = colors("93")
+	BYellow = Colors("93")
 	// BBlue a brighter blue
-	BBlue = colors("94")
+	BBlue = Colors("94")
 	// BMagenta a brighter magenta
-	BMagenta = colors("95")
+	BMagenta = Colors("95")
 	// BCyan a brighter cyan
-	BCyan = colors("96")
+	BCyan = Colors("96")
 	// BWhite a brighter white
-	BWhite = colors("97")
+	BWhite = Colors("97")
 )
 
 // GetColor return formatted ansi escape color
-func GetColor(color colors) string {
+func GetColor(color Colors) string {
 	return begin + string(color) + "m"
 }
 
 // ToBackground convert colors to background colors
-func ToBackground(color colors) string {
+func ToBackground(color Colors) string {
 	colorNum, err := strconv.Atoi(string(color))
 	if err != nil {
 		fmt.Println("ERROR (PrettyPrinter): could not convert color to background color")
@@ -120,6 +159,10 @@ func Init() {
 	}
 }
 
+func SetCurrentLevel(lvl Level) {
+	currentLevel = int(lvl)
+}
+
 // Clear clears console
 func Clear() {
 	fmt.Print(clear)
@@ -135,38 +178,50 @@ func ResetColor() string {
 	return cRST
 }
 
-// SetInfoColor change the color of info log
-func SetInfoColor(color colors) {
-	logType[pINFO] = GetColor(color) + "INFO" + cRST
-}
-
-// SetWarnColor change the color of warn log
-func SetWarnColor(color colors) {
-	logType[pWARN] = GetColor(color) + "WARN" + cRST
+// SetFatalColor change the color of fatal log
+func SetFatalColor(color Colors) {
+	logType[pFATA] = GetColor(color) + "FATA" + cRST
 }
 
 // SetErrorColor change the color of error log
-func SetErrorColor(color colors) {
-	logType[pERROR] = GetColor(color) + "ERROR" + cRST
+func SetErrorColor(color Colors) {
+	logType[pERRO] = GetColor(color) + "ERRO" + cRST
+}
+
+// SetWarnColor change the color of warn log
+func SetWarnColor(color Colors) {
+	logType[pWARN] = GetColor(color) + "WARN" + cRST
+}
+
+// SetInfoColor change the color of info log
+func SetInfoColor(color Colors) {
+	logType[pINFO] = GetColor(color) + "INFO" + cRST
 }
 
 // SetVerboseColor change the color of verbose log
-func SetVerboseColor(color colors) {
-	logType[pVBOSE] = GetColor(color) + "VBOSE" + cRST
+func SetVerboseColor(color Colors) {
+	logType[pVBSE] = GetColor(color) + "VBSE" + cRST
 }
 
-// SetFatalColor change the color of fatal log
-func SetFatalColor(color colors) {
-	logType[pFATAL] = GetColor(color) + "FATAL" + cRST
+// SetTraceColor change the color of trace log
+func SetTraceColor(color Colors) {
+	logType[pTRCE] = GetColor(color) + "TRAC" + cRST
 }
 
 // ###################### Format Log ######################
 
-// Infof formats according to a format specifier amoung other prefex
+// Fatalf formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
-func Infof(msg string, args ...interface{}) string {
+func Fatalf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pINFO, str)
+	return Printer(pFATA, str)
+}
+
+// Errorf formats according to a format specifier amoung other prefex
+// and writes to standard output. It returns the string displayed to console.
+func Errorf(msg string, args ...interface{}) string {
+	str := fmt.Sprintf(msg, args...)
+	return Printer(pERRO, str)
 }
 
 // Warnf formats according to a format specifier amoung other prefex
@@ -176,37 +231,47 @@ func Warnf(msg string, args ...interface{}) string {
 	return Printer(pWARN, str)
 }
 
-// Errorf formats according to a format specifier amoung other prefex
+// Infof formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
-func Errorf(msg string, args ...interface{}) string {
+func Infof(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pERROR, str)
+	return Printer(pINFO, str)
 }
 
 // Verbosef formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Verbosef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pVBOSE, str)
+	return Printer(pVBSE, str)
 }
 
-// Fatalf formats according to a format specifier amoung other prefex
+// Tracef formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
-func Fatalf(msg string, args ...interface{}) string {
+func Tracef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pFATAL, str)
+	return Printer(pTRCE, str)
 }
 
 // ###################### NewLine Log ######################
 
-// Infoln formats using the default formats for its operands and writes to standard output.
+// Fatalln formats using the default formats for its operands and writes to standard output.
 // Spaces are always added between operands and a newline is appended.
 // It returns the string displayed to console.
-func Infoln(args ...interface{}) string {
+func Fatalln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pINFO, msg)
+	return Printer(pFATA, msg)
+}
+
+// Errorln formats using the default formats for its operands and writes to standard output.
+// Spaces are always added between operands and a newline is appended.
+// It returns the string displayed to console.
+func Errorln(args ...interface{}) string {
+	args = checkPointerType(args...)
+	format := getFormatStr(len(args))
+	msg := fmt.Sprintf(format+"\n", args...)
+	return Printer(pERRO, msg)
 }
 
 // Warnln formats using the default formats for its operands and writes to standard output.
@@ -219,14 +284,14 @@ func Warnln(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
-// Errorln formats using the default formats for its operands and writes to standard output.
+// Infoln formats using the default formats for its operands and writes to standard output.
 // Spaces are always added between operands and a newline is appended.
 // It returns the string displayed to console.
-func Errorln(args ...interface{}) string {
+func Infoln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pERROR, msg)
+	return Printer(pINFO, msg)
 }
 
 // Verboseln formats using the default formats for its operands and writes to standard output.
@@ -236,29 +301,39 @@ func Verboseln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pVBOSE, msg)
+	return Printer(pVBSE, msg)
 }
 
-// Fatalln formats using the default formats for its operands and writes to standard output.
+// Traceln formats using the default formats for its operands and writes to standard output.
 // Spaces are always added between operands and a newline is appended.
 // It returns the string displayed to console.
-func Fatalln(args ...interface{}) string {
+func Traceln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pFATAL, msg)
+	return Printer(pTRCE, msg)
 }
 
 // ###################### Non-Format Log ######################
 
-// Info formats using the default formats for its operands and writes to standard output.
+// Fatal formats using the default formats for its operands and writes to standard output.
 // Spaces are added between operands when neither is a string.
 // It returns the string displayed to console.
-func Info(args ...interface{}) string {
+func Fatal(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pINFO, msg)
+	return Printer(pFATA, msg)
+}
+
+// Error formats using the default formats for its operands and writes to standard output.
+// Spaces are added between operands when neither is a string.
+// It returns the string displayed to console.
+func Error(args ...interface{}) string {
+	args = checkPointerType(args...)
+	format := getFormatStr(len(args))
+	msg := fmt.Sprintf(format, args...)
+	return Printer(pERRO, msg)
 }
 
 // Warn formats using the default formats for its operands and writes to standard output.
@@ -271,14 +346,14 @@ func Warn(args ...interface{}) string {
 	return Printer(pWARN, msg)
 }
 
-// Error formats using the default formats for its operands and writes to standard output.
+// Info formats using the default formats for its operands and writes to standard output.
 // Spaces are added between operands when neither is a string.
 // It returns the string displayed to console.
-func Error(args ...interface{}) string {
+func Info(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pERROR, msg)
+	return Printer(pINFO, msg)
 }
 
 // Verbose formats using the default formats for its operands and writes to standard output.
@@ -288,23 +363,27 @@ func Verbose(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pVBOSE, msg)
+	return Printer(pVBSE, msg)
 }
 
-// Fatal formats using the default formats for its operands and writes to standard output.
+// Trace formats using the default formats for its operands and writes to standard output.
 // Spaces are added between operands when neither is a string.
 // It returns the string displayed to console.
-func Fatal(args ...interface{}) string {
+func Trace(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pFATAL, msg)
+	return Printer(pTRCE, msg)
 }
 
 // ###################### The Big Boy on the Block ######################
 
 // Printer output msg to console with a desire log type prefix
-func Printer(prefix uint8, msg string) string {
+func Printer(prefix Log, msg string) string {
+	if (1 << prefix & currentLevel) == 0 {
+		return ""
+	}
+
 	result := logType[prefix] + LoggerPrefix() + msg
 	fmt.Print(result)
 	return displayLog[prefix] + LoggerPrefix() + msg

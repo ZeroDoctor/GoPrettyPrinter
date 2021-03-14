@@ -9,16 +9,19 @@ import (
 
 var (
 	begin = "\x1b[1;" // forced 1;
-	// IFO default info's log foreground color to regular blue
-	IFO = "\x1b[1;36m"
-	// WRN default warn's log foreground color to regular yellow
-	WRN = "\x1b[1;33m"
+	// FAT default fatal's log color foreground to red and background to yellowish
+	FAT = "\x1b[1;31;103m"
 	// ERR default error's log foreground color to regular red
 	ERR = "\x1b[1;31m"
+	// WRN default warn's log foreground color to regular yellow
+	WRN = "\x1b[1;33m"
+	// IFO default info's log foreground color to regular blue
+	IFO = "\x1b[1;36m"
 	// VER default verbose's log foreground color to regular green
 	VER = "\x1b[1;32m"
-	// FAT default fatal's log color foreground to red and background to yellowish
-	FAT       = "\x1b[1;31;103m"
+	// TRA default trace's log foreground color to regular white
+	TRA = "\x1b[1;37m"
+
 	cRST      = "\x1b[0m"
 	clear     = "\x1b[2J"
 	rstCursor = "\x1b[1;1H"

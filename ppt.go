@@ -159,6 +159,10 @@ func Init() {
 	}
 }
 
+func GetCurrentLevel() int {
+	return currentLevel
+}
+
 func SetCurrentLevel(lvl Level) {
 	currentLevel = int(lvl)
 }

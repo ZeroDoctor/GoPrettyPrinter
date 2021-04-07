@@ -91,6 +91,7 @@ var (
 	}
 
 	currentLevel = lvlFATA | lvlERRO | lvlWARN | lvlINFO
+	enable       = true
 )
 
 // Colors <-
@@ -131,6 +132,11 @@ const (
 	// BWhite a brighter white
 	BWhite = Colors("97")
 )
+
+// TogglePrint to console
+func TogglePrint() {
+	enable = !enable
+}
 
 // GetColor return formatted ansi escape color
 func GetColor(color Colors) string {
@@ -389,7 +395,9 @@ func Printer(prefix Log, msg string) string {
 	}
 
 	result := logType[prefix] + LoggerPrefix() + msg
-	fmt.Print(result)
+	if enable {
+		fmt.Print(result)
+	}
 	return displayLog[prefix] + LoggerPrefix() + msg
 }
 

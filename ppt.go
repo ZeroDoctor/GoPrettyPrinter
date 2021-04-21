@@ -81,6 +81,8 @@ var (
 		"TRAC",
 	}
 
+	funcHandle = [6]func(string){}
+
 	logType = [6]string{
 		FAT + "FATA" + cRST,
 		ERR + "ERRO" + cRST,
@@ -186,6 +188,36 @@ func ResetCursor() {
 // ResetColor changes consoles' colors back to normal
 func ResetColor() string {
 	return cRST
+}
+
+// SetFatalHandle handles fatal messages
+func SetFatalHandle(f func(string)) {
+	funcHandle[pFATA] = f
+}
+
+// SetErrorHandle handles error messages
+func SetErrorHandle(f func(string)) {
+	funcHandle[pERRO] = f
+}
+
+// SetWarnHandle handles warn messages
+func SetWarnHandle(f func(string)) {
+	funcHandle[pWARN] = f
+}
+
+// SetInfoHandle handles info messages
+func SetInfoHandle(f func(string)) {
+	funcHandle[pINFO] = f
+}
+
+// SetVerboseHandle handles verbose messages
+func SetVerboseHandle(f func(string)) {
+	funcHandle[pVBSE] = f
+}
+
+// SetTraceHandle handles trace messages
+func SetTraceHandle(f func(string)) {
+	funcHandle[pTRCE] = f
 }
 
 // SetFatalColor change the color of fatal log
@@ -398,7 +430,13 @@ func Printer(prefix Log, msg string) string {
 	if enable {
 		fmt.Print(result)
 	}
-	return displayLog[prefix] + LoggerPrefix() + msg
+	out := displayLog[prefix] + LoggerPrefix() + msg
+
+	if funcHandle[prefix] != nil {
+		funcHandle[prefix](out)
+	}
+
+	return out
 }
 
 // ###################### Decorator ######################

@@ -81,7 +81,7 @@ var (
 		"TRAC",
 	}
 
-	funcHandle = [6]func(string){}
+	LogCallback = [6]func(string, ...interface{}){}
 
 	logType = [6]string{
 		FAT + "FATA" + cRST,
@@ -190,36 +190,6 @@ func ResetColor() string {
 	return cRST
 }
 
-// SetFatalHandle handles fatal messages
-func SetFatalHandle(f func(string)) {
-	funcHandle[pFATA] = f
-}
-
-// SetErrorHandle handles error messages
-func SetErrorHandle(f func(string)) {
-	funcHandle[pERRO] = f
-}
-
-// SetWarnHandle handles warn messages
-func SetWarnHandle(f func(string)) {
-	funcHandle[pWARN] = f
-}
-
-// SetInfoHandle handles info messages
-func SetInfoHandle(f func(string)) {
-	funcHandle[pINFO] = f
-}
-
-// SetVerboseHandle handles verbose messages
-func SetVerboseHandle(f func(string)) {
-	funcHandle[pVBSE] = f
-}
-
-// SetTraceHandle handles trace messages
-func SetTraceHandle(f func(string)) {
-	funcHandle[pTRCE] = f
-}
-
 // SetFatalColor change the color of fatal log
 func SetFatalColor(color Colors) {
 	logType[pFATA] = GetColor(color) + "FATA" + cRST
@@ -256,42 +226,42 @@ func SetTraceColor(color Colors) {
 // and writes to standard output. It returns the string displayed to console.
 func Fatalf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pFATA, str)
+	return Printer(pFATA, str, args)
 }
 
 // Errorf formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Errorf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pERRO, str)
+	return Printer(pERRO, str, args)
 }
 
 // Warnf formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Warnf(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pWARN, str)
+	return Printer(pWARN, str, args)
 }
 
 // Infof formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Infof(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pINFO, str)
+	return Printer(pINFO, str, args)
 }
 
 // Verbosef formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Verbosef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pVBSE, str)
+	return Printer(pVBSE, str, args)
 }
 
 // Tracef formats according to a format specifier amoung other prefex
 // and writes to standard output. It returns the string displayed to console.
 func Tracef(msg string, args ...interface{}) string {
 	str := fmt.Sprintf(msg, args...)
-	return Printer(pTRCE, str)
+	return Printer(pTRCE, str, args)
 }
 
 // ###################### NewLine Log ######################
@@ -303,7 +273,7 @@ func Fatalln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pFATA, msg)
+	return Printer(pFATA, msg, args)
 }
 
 // Errorln formats using the default formats for its operands and writes to standard output.
@@ -313,7 +283,7 @@ func Errorln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pERRO, msg)
+	return Printer(pERRO, msg, args)
 }
 
 // Warnln formats using the default formats for its operands and writes to standard output.
@@ -323,7 +293,7 @@ func Warnln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pWARN, msg)
+	return Printer(pWARN, msg, args)
 }
 
 // Infoln formats using the default formats for its operands and writes to standard output.
@@ -333,7 +303,7 @@ func Infoln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pINFO, msg)
+	return Printer(pINFO, msg, args)
 }
 
 // Verboseln formats using the default formats for its operands and writes to standard output.
@@ -343,7 +313,7 @@ func Verboseln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pVBSE, msg)
+	return Printer(pVBSE, msg, args)
 }
 
 // Traceln formats using the default formats for its operands and writes to standard output.
@@ -353,7 +323,7 @@ func Traceln(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format+"\n", args...)
-	return Printer(pTRCE, msg)
+	return Printer(pTRCE, msg, args)
 }
 
 // ###################### Non-Format Log ######################
@@ -365,7 +335,7 @@ func Fatal(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pFATA, msg)
+	return Printer(pFATA, msg, args)
 }
 
 // Error formats using the default formats for its operands and writes to standard output.
@@ -375,7 +345,7 @@ func Error(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pERRO, msg)
+	return Printer(pERRO, msg, args)
 }
 
 // Warn formats using the default formats for its operands and writes to standard output.
@@ -385,7 +355,7 @@ func Warn(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pWARN, msg)
+	return Printer(pWARN, msg, args)
 }
 
 // Info formats using the default formats for its operands and writes to standard output.
@@ -395,7 +365,7 @@ func Info(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pINFO, msg)
+	return Printer(pINFO, msg, args)
 }
 
 // Verbose formats using the default formats for its operands and writes to standard output.
@@ -405,7 +375,7 @@ func Verbose(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pVBSE, msg)
+	return Printer(pVBSE, msg, args)
 }
 
 // Trace formats using the default formats for its operands and writes to standard output.
@@ -415,13 +385,13 @@ func Trace(args ...interface{}) string {
 	args = checkPointerType(args...)
 	format := getFormatStr(len(args))
 	msg := fmt.Sprintf(format, args...)
-	return Printer(pTRCE, msg)
+	return Printer(pTRCE, msg, args)
 }
 
 // ###################### The Big Boy on the Block ######################
 
 // Printer output msg to console with a desire log type prefix
-func Printer(prefix Log, msg string) string {
+func Printer(prefix Log, msg string, args ...interface{}) string {
 	if (1 << prefix & currentLevel) == 0 {
 		return ""
 	}
@@ -432,8 +402,8 @@ func Printer(prefix Log, msg string) string {
 	}
 	out := displayLog[prefix] + LoggerPrefix() + msg
 
-	if funcHandle[prefix] != nil {
-		funcHandle[prefix](out)
+	if LogCallback[prefix] != nil {
+		LogCallback[prefix](out, args)
 	}
 
 	return out
